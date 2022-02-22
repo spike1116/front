@@ -14,6 +14,6 @@ public class StudentController {
 
     @PostMapping
     public Result save(){
-
+        return new Result();
     }
 }
