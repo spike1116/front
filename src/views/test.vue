@@ -1,9 +1,9 @@
 <template>
 <div style="padding:10px">
     <div style="margin-bottom:10px">
-        <el-input style="width:15%"></el-input>
-        <el-button  type="primary" style="margin-left:10px" @click="centerDialogVisible=true">搜索</el-button>
-        <el-button type="primary" @click="add()">添加</el-button>
+        <el-input style="width:15%" v-model="search" placeholder="请输入学生姓名" clearable></el-input>
+        <el-button  type="primary" style="margin-left:10px" @click="load">搜索</el-button>
+        <el-button type="primary" @click="add">添加</el-button>
     </div>
     <div>
 <el-table
@@ -19,7 +19,7 @@
     <el-table-column prop="phone" label="电话"  />
     <el-table-column label="操作">
       <template #default="scope">
-        <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
+        <el-button size="small" @click="handleEdit(scope.row)"
           >编辑</el-button
         >
         <el-button
@@ -59,18 +59,14 @@
     width="30%"
     :before-close="handleClose"
   >
-    <el-form ref="editForm" :model="editForm" label-width="80px">
-              <el-form-item label="学号" prop="name">
-                <el-input v-model="editForm.id" auto-complete="off" />
-              </el-form-item>
+    <el-form  :model="editForm" label-width="80px">
+
               <el-form-item label="姓名">
                 <el-input v-model="editForm.name" />
               </el-form-item>
             <el-form-item label="性别">
-            <el-radio-group v-model="editForm.sex">
-                <el-radio label="男"></el-radio>
-                <el-radio label="女"></el-radio>
-            </el-radio-group>
+                <el-radio v-model="editForm.sex" label="男">男</el-radio>
+                <el-radio v-model="editForm.sex" label="女">女</el-radio>
             </el-form-item>
               <el-form-item label="年龄">
                 <el-input v-model="editForm.age" />
@@ -82,7 +78,7 @@
     
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="primary" @click="save()">确认</el-button>
+        <el-button type="primary" @click="save">确认</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
        
       </span>
@@ -104,12 +100,28 @@ export default {
         return {
             dialogVisible:false,
             currentPage:1,
-            total:7,
-            editForm:{},
-            tableData:[]
+            total:10,
+            editForm: {},
+            tableData:[],
+            search:''
         }     
     },
         methods:{
+            load(){
+                request.get("/student",{
+                params:{
+                    pageNum:this.currentPage,
+                    pageSize:this.pageSize,
+                    search:this.search
+                }
+
+
+                }).then(res=>{
+                    console.log(res);
+                    this.tableData=res.data.records;
+                    this.total=res.data.total;
+                })
+            },
             handleDelete(index,row){
                 
                 console.log(row.id)
@@ -117,15 +129,50 @@ export default {
             },
             add(){
                 this.dialogVisible=true;
-                this.editForm={};
+                this.editForm = {}
             },
             save(){
-                this.dialogVisible=false;
-                request.post("/student",this.editForm).then(res =>{
-                    console.log(res)
-                })
+                if(this.editForm.id!=null){
+                    request.put("/student",this.editForm).then(res =>{
+                        console.log(res)
+                        if(res.code==='0'){
+                            this.$message({
+                                type:"success",
+                                message:"更新成功"
+                            })
+                        }else{
+                            this.$message({
+                                type:"error",
+                                message:res.msg
+                            })
+                        }
+                        this.load();
+                        this.dialogVisible=false;
+                    })
+                }else{
+                    request.post("/student",this.editForm).then(res =>{
+                        console.log(res.code)
+                        if(res.code==='0'){
+                            this.$message({
+                                type:"success",
+                                message:"新增成功"
+                            })
+                        }else{
+                            this.$message({
+                                type:"error",
+                                message:res.msg
+                            })
+                        }
+                        this.load();
+                        this.dialogVisible=false;
+                    })
+                }
+
             },
-            handleEdit(index,row){
+            find(){
+                this.load();
+            },
+            handleEdit(row){
                 console.log(row);
                 this.dialogVisible=true;
                 this.editForm=JSON.parse(JSON.stringify(row))
@@ -138,9 +185,14 @@ export default {
             }
 
     },
-    mounted(){
-        this.tableData=request.getAll("/student/getall");
+    created(){
+        this.load();
     }
+    // // mounted(){
+    // //     request.get("/student").then(res=>{
+    // //         this.tableData=res;
+    // //     })
+    // }
 
 }
 </script>

@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.common.Result;
@@ -27,13 +29,22 @@ public class StudentController {
     public Result<?> save(@RequestBody Student student){
 
         studentmapper.insert(student);
-        return new Result();
+        return  Result.success();
     }
 
    @GetMapping
-    public Result<?> findpage(@RequestParam (defaultValue = "1") Integer pageNum,@RequestParam (defaultValue = "10")Integer pageSize,@RequestParam (defaultValue = "''") String search){
-        Page<Student> studentPage=studentmapper.selectPage(new Page<>(pageNum,pageSize), Wrappers.<Student>lambdaQuery().like(Student::getName,search));
-
+    public Result<?> findpage(@RequestParam (defaultValue = "1") Integer pageNum,@RequestParam (defaultValue = "10")Integer pageSize,@RequestParam (defaultValue = "") String search){
+       LambdaQueryWrapper<Student> wrapper = Wrappers.<Student>lambdaQuery();
+       if(StrUtil.isNotBlank(search)){
+           wrapper.like(Student::getName, search);
+       }
+        Page<Student> studentPage=studentmapper.selectPage(new Page<>(pageNum,pageSize),wrapper);
         return Result.success(studentPage);
+   }
+
+   @PutMapping
+      public Result<?> update(@RequestBody Student student){
+        studentmapper.updateById(student);
+        return  Result.success();
    }
 }
