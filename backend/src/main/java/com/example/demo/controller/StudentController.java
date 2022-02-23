@@ -33,7 +33,9 @@ public class StudentController {
     }
 
    @GetMapping
-    public Result<?> findpage(@RequestParam (defaultValue = "1") Integer pageNum,@RequestParam (defaultValue = "10")Integer pageSize,@RequestParam (defaultValue = "") String search){
+    public Result<?> findpage(@RequestParam (defaultValue = "1") Integer pageNum,
+                              @RequestParam (defaultValue = "10")Integer pageSize,
+                              @RequestParam (defaultValue = "") String search){
        LambdaQueryWrapper<Student> wrapper = Wrappers.<Student>lambdaQuery();
        if(StrUtil.isNotBlank(search)){
            wrapper.like(Student::getName, search);
@@ -46,5 +48,11 @@ public class StudentController {
       public Result<?> update(@RequestBody Student student){
         studentmapper.updateById(student);
         return  Result.success();
+   }
+   @DeleteMapping("/{id}")
+    public Result<?> update(@PathVariable Integer id){
+
+        studentmapper.deleteById(id);
+        return Result.success();
    }
 }

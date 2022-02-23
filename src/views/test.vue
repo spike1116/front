@@ -22,33 +22,34 @@
         <el-button size="small" @click="handleEdit(scope.row)"
           >编辑</el-button
         >
-        <el-button
-          size="small"
-          type="danger"
-          @click="handleDelete(scope.$index, scope.row)"
-          >删除</el-button
-        >
+
+          <el-popconfirm title="是否删除该学生数据？" @confirm="handleDelete(scope.row.id)">
+              <template #reference>
+                  <el-button
+                          size="small"
+                          type="danger"
+                         >删除</el-button>
+              </template>
+          </el-popconfirm>
+
         </template>
         </el-table-column>
         </el-table>
 
     </div>
     
-    <div class="demo-pagination-block">
-    <el-pagination
-      v-model:currentPage="currentPage4"
-      v-model:page-size="pageSize4"
-      :page-sizes="[5,10,20]"
-      :page-size="10"
-      :small="small"
-      :disabled="disabled"
-      :background="background"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    >
-    </el-pagination>
+    <div >
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[5, 10, 20]"
+                :page-size="pageSize"
+
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total"
+        >
+        </el-pagination>
   </div>
 
 
@@ -100,6 +101,7 @@ export default {
         return {
             dialogVisible:false,
             currentPage:1,
+            pageSize:5,
             total:10,
             editForm: {},
             tableData:[],
@@ -122,10 +124,34 @@ export default {
                     this.total=res.data.total;
                 })
             },
-            handleDelete(index,row){
-                
-                console.log(row.id)
-                console.log(index)
+
+            handleSizeChange(pageSize){
+                console.log(pageSize)
+                this.pageSize=pageSize
+                this.load();
+            },
+            handleCurrentChange(pageNum){
+                console.log(pageNum)
+                this.currentPage=pageNum;
+                this.load();
+            },
+            handleDelete(id){
+                request.delete("/student/"+id).then(res=>{
+                    if(res.code==='0'){
+                        this.$message({
+                            type:"success",
+                            message:"删除成功"
+                        })
+                    }else{
+                        this.$message({
+                            type:"error",
+                            message:res.msg
+                        })
+                    }
+                })
+                this.load();
+                console.log(id)
+
             },
             add(){
                 this.dialogVisible=true;
@@ -176,12 +202,6 @@ export default {
                 console.log(row);
                 this.dialogVisible=true;
                 this.editForm=JSON.parse(JSON.stringify(row))
-            },
-            handleSizechange(){
-
-            },
-            handleCurrentChange(){
-
             }
 
     },
