@@ -66,9 +66,12 @@
               <el-form-item label="姓名">
                 <el-input v-model="editForm.name" />
               </el-form-item>
-              <el-form-item label="性别">
-                <el-input v-model="editForm.sex" />
-              </el-form-item>
+            <el-form-item label="性别">
+            <el-radio-group v-model="editForm.sex">
+                <el-radio label="男"></el-radio>
+                <el-radio label="女"></el-radio>
+            </el-radio-group>
+            </el-form-item>
               <el-form-item label="年龄">
                 <el-input v-model="editForm.age" />
               </el-form-item>
@@ -79,7 +82,7 @@
     
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false">确认</el-button>
+        <el-button type="primary" @click="save()">确认</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
        
       </span>
@@ -93,6 +96,8 @@
 </template>
 
 <script>
+import request from "../utils/request";
+
 export default {
     name:'Test',
     data(){
@@ -100,17 +105,8 @@ export default {
             dialogVisible:false,
             currentPage:1,
             total:7,
-            editForm:{
-               
-            },
-            tableData:[{id:20011825,name:"王晓鹏",sex:"男",age:22,phone:"15874598752"},
-            {id:20011824,name:"李云",sex:"男",age:21,phone:"15874598752"},
-            {id:20011823,name:"刘萌",sex:"男",age:22,phone:"15874598752"},
-            {id:20011822,name:"吴鹏飞",sex:"男",age:22,phone:"15874598752"},
-            {id:20011820,name:"胡中伟",sex:"男",age:22,phone:"15874598752"},
-            {id:20011821,name:"李辉",sex:"男",age:22,phone:"15874598752"},
-            {id:20011819,name:"陈宏远",sex:"男",age:22,phone:"15874598752"},
-            ]
+            editForm:{},
+            tableData:[]
         }     
     },
         methods:{
@@ -120,7 +116,14 @@ export default {
                 console.log(index)
             },
             add(){
-           
+                this.dialogVisible=true;
+                this.editForm={};
+            },
+            save(){
+                this.dialogVisible=false;
+                request.post("/student",this.editForm).then(res =>{
+                    console.log(res)
+                })
             },
             handleEdit(index,row){
                 console.log(row);
@@ -134,6 +137,9 @@ export default {
 
             }
 
+    },
+    mounted(){
+        this.tableData=request.getAll("/student/getall");
     }
 
 }
