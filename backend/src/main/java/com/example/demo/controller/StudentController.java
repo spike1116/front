@@ -24,15 +24,13 @@ public class StudentController {
     StudentMapper studentmapper;
 
     @PostMapping
-
     //@RequestBody 把前台传过来的JSON对象映射成Java实体
     public Result<?> save(@RequestBody Student student){
-
         studentmapper.insert(student);
         return  Result.success();
     }
 
-   @GetMapping
+    @GetMapping
     public Result<?> findpage(@RequestParam (defaultValue = "1") Integer pageNum,
                               @RequestParam (defaultValue = "10")Integer pageSize,
                               @RequestParam (defaultValue = "") String search){
@@ -44,14 +42,16 @@ public class StudentController {
         return Result.success(studentPage);
    }
 
-   @PutMapping
+
+    @PutMapping
       public Result<?> update(@RequestBody Student student){
         studentmapper.updateById(student);
         return  Result.success();
    }
-   @DeleteMapping("/{id}")
-    public Result<?> update(@PathVariable Integer id){
 
+
+        @DeleteMapping("/{id}")
+    public Result<?> update(@PathVariable Integer id){
         studentmapper.deleteById(id);
         return Result.success();
    }
